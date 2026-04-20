@@ -46,7 +46,7 @@ jobs:
         run: npm ci
 
       - name: Run tests
-        run: npm test -- --watchAll=false --passWithNoTests
+        run: npm test
 
       - name: Upload coverage report
         if: always()
@@ -77,11 +77,11 @@ jobs:
       - name: Build production bundle
         run: npm run build
         env:
-          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v5
         with:
           name: build-output
-          path: build/
+          path: dist/
           retention-days: 7
