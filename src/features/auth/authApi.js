@@ -1,11 +1,11 @@
-import api from "../../shared/api/axiosInstance";
+import axiosInstance from '../../shared/api/axiosInstance';
 
-export async function login(email, password) {
-  const response = await api.post("/Auth/login", { email, password });
-  return response.data;
-}
-
-export async function register(email, password) {
-  const response = await api.post("/Auth/register", { email, password });
-  return response.data;
-}
+export const authApi = {
+  login: async (email, password) => {
+    const response = await axiosInstance.post('/api/Auth/login', {
+      email,
+      password,
+    });
+    return response.data; // { token, user }
+  },
+};
