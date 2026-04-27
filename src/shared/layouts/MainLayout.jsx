@@ -1,49 +1,61 @@
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../../features/auth/AuthContext";
+import { useState, useRef, useEffect } from 'react';
+import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../features/auth/AuthContext';
+import styles from './MainLayout.module.css';
 
 const navItems = [
-  { to: "/dashboard", label: "Dashboard" },
-  { to: "/reviews", label: "Reviews" },
-  { to: "/businesses", label: "Businesses" },
-  { to: "/analytics", label: "Analytics" },
+  { to: '/dashboard', label: 'Dashboard' },
+  { to: '/reviews', label: 'Reviews' },
+  { to: '/businesses', label: 'Businesses' },
+  { to: '/analytics', label: 'Analytics' },
 ];
 
 export default function MainLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  // Close menu when clicking outside or pressing Escape
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    function handleClickOutside(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    }
+    function handleEscape(e) {
+      if (e.key === 'Escape') setMenuOpen(false);
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [menuOpen]);
 
   function handleLogout() {
+    setMenuOpen(false);
     logout();
-    navigate("/login");
+    navigate('/login');
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
+    <div className={styles.layout}>
       {/* Sidebar */}
-      <aside
-        style={{
-          width: 220,
-          background: "#1e293b",
-          color: "#fff",
-          padding: "1.5rem 1rem",
-        }}
-      >
-        <h2 style={{ marginBottom: "2rem", fontSize: "1.25rem" }}>
-          ⭐ StarBoard
-        </h2>
-        <nav style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+      <aside className={styles.sidebar}>
+        <h2 className={styles.brand}>⭐ StarBoard</h2>
+        <nav className={styles.nav}>
           {navItems.map(({ to, label }) => (
             <NavLink
               key={to}
               to={to}
-              style={({ isActive }) => ({
-                padding: "0.5rem 0.75rem",
-                borderRadius: 6,
-                color: isActive ? "#fff" : "#94a3b8",
-                background: isActive ? "#334155" : "transparent",
-                textDecoration: "none",
-                fontWeight: isActive ? 600 : 400,
-              })}
+              className={({ isActive }) =>
+                `${styles.navLink} ${isActive ? styles.navLinkActive : ''}`
+              }
             >
               {label}
             </NavLink>
@@ -52,34 +64,45 @@ export default function MainLayout() {
       </aside>
 
       {/* Main content */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      <div className={styles.content}>
         {/* Top bar */}
-        <header
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            alignItems: "center",
-            padding: "1rem 1.5rem",
-            borderBottom: "1px solid #e2e8f0",
-            gap: "1rem",
-          }}
-        >
-          <span style={{ color: "#64748b" }}>{user?.email}</span>
-          <button
-            onClick={handleLogout}
-            style={{
-              padding: "0.4rem 0.9rem",
-              borderRadius: 6,
-              border: "1px solid #e2e8f0",
-              cursor: "pointer",
-            }}
-          >
-            Logout
-          </button>
+        <header className={styles.header}>
+          <div className={styles.userMenu} ref={menuRef}>
+            <button
+              type="button"
+              className={styles.userButton}
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+            >
+              <span className={styles.userEmail}>{user?.email}</span>
+              <span className={styles.chevron} aria-hidden="true">
+                ▾
+              </span>
+            </button>
+
+            {menuOpen && (
+              <div className={styles.dropdown} role="menu">
+                <div className={styles.dropdownHeader}>
+                  <div className={styles.dropdownLabel}>Signed in as</div>
+                  <div className={styles.dropdownEmail}>{user?.email}</div>
+                </div>
+                <div className={styles.divider} />
+                <button
+                  type="button"
+                  className={styles.dropdownItem}
+                  onClick={handleLogout}
+                  role="menuitem"
+                >
+                  Sign out
+                </button>
+              </div>
+            )}
+          </div>
         </header>
 
         {/* Page content */}
-        <main style={{ flex: 1, padding: "2rem" }}>
+        <main className={styles.main}>
           <Outlet />
         </main>
       </div>
