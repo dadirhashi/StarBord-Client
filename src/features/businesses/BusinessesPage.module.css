@@ -4,11 +4,26 @@
   margin: 0 auto;
 }
 
-.header {
+.headerRight {
   display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 24px;
+  align-items: center;
+  gap: 16px;
+}
+
+.addButton {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.addButton:hover {
+  background: #1d4ed8;
 }
 
 .title {

@@ -3,11 +3,19 @@ import { useParams, Navigate } from 'react-router-dom';
 import { reviewsApi } from './reviewsApi';
 import styles from './ReviewsPage.module.css';
 
-// (delete TEMP_BUSINESS_ID entirely)
-
 const renderStars = (rating) => '★'.repeat(rating) + '☆'.repeat(5 - rating);
 
-const formatDate = (iso) => { /* unchanged */ };
+const formatDate = (iso) => {
+  try {
+    return new Date(iso).toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  } catch {
+    return '';
+  }
+};
 
 export default function ReviewsPage() {
   const { businessId } = useParams();
@@ -45,6 +53,7 @@ export default function ReviewsPage() {
   }, [businessId]);
 
   if (!businessId) return <Navigate to="/businesses" replace />;
+  if (loading) return <div className={styles.loading}>Loading reviews…</div>;
   if (error) return <div className={styles.error}>Error: {error}</div>;
 
   return (
