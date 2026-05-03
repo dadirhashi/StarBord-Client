@@ -5,7 +5,6 @@ import styles from './MainLayout.module.css';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard' },
-  { to: '/reviews', label: 'Reviews' },
   { to: '/businesses', label: 'Businesses' },
   { to: '/analytics', label: 'Analytics' },
 ];

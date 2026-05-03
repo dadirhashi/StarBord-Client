@@ -1,38 +1,31 @@
 import { useEffect, useState } from 'react';
+import { useParams, Navigate } from 'react-router-dom';
 import { reviewsApi } from './reviewsApi';
 import styles from './ReviewsPage.module.css';
 
-// TEMP: hardcode until we build the Businesses page.
-// Paste the businessId you just used to seed the mock Google reviews.
-const TEMP_BUSINESS_ID = 'bf88faf5-e4ca-4f8e-bf33-21555109f437';
+// (delete TEMP_BUSINESS_ID entirely)
 
 const renderStars = (rating) => '★'.repeat(rating) + '☆'.repeat(5 - rating);
 
-const formatDate = (iso) => {
-  try {
-    return new Date(iso).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  } catch {
-    return '';
-  }
-};
+const formatDate = (iso) => { /* unchanged */ };
 
 export default function ReviewsPage() {
+  const { businessId } = useParams();
+
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!businessId) return;
+
     let cancelled = false;
 
     const load = async () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await reviewsApi.getByBusiness(TEMP_BUSINESS_ID);
+        const data = await reviewsApi.getByBusiness(businessId);
         if (!cancelled) setReviews(data);
       } catch (err) {
         if (!cancelled) {
@@ -49,9 +42,9 @@ export default function ReviewsPage() {
 
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [businessId]);
 
-  if (loading) return <div className={styles.loading}>Loading reviews…</div>;
+  if (!businessId) return <Navigate to="/businesses" replace />;
   if (error) return <div className={styles.error}>Error: {error}</div>;
 
   return (
