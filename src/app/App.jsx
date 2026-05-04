@@ -24,7 +24,7 @@ export default function App() {
           <Route element={<MainLayout />}>
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/reviews" element={<ReviewsPage />} />
+            <Route path="/reviews/:businessId" element={<ReviewsPage />} />
             <Route path="/businesses" element={<BusinessesPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
           </Route>

@@ -1,16 +1,22 @@
-import api from "../../shared/api/axiosInstance";
+import axiosInstance from '../../shared/api/axiosInstance';
 
-export const getBusinesses = () =>
-  api.get("/Businesses").then((r) => r.data);
+export const businessesApi = {
+  getAll: async () => {
+    const { data } = await axiosInstance.get('/api/Businesses');
+    return data;
+  },
 
-export const getBusiness = (id) =>
-  api.get(`/Businesses/${id}`).then((r) => r.data);
+  getById: async (id) => {
+    const { data } = await axiosInstance.get(`/api/Businesses/${id}`);
+    return data;
+  },
 
-export const createBusiness = (data) =>
-  api.post("/Businesses", data).then((r) => r.data);
+  create: async (payload) => {
+    const { data } = await axiosInstance.post('/api/Businesses', payload);
+    return data;
+  },
 
-export const updateBusiness = (id, data) =>
-  api.put(`/Businesses/${id}`, data).then((r) => r.data);
-
-export const deleteBusiness = (id) =>
-  api.delete(`/Businesses/${id}`).then((r) => r.data);
+  delete: async (id) => {
+    await axiosInstance.delete(`/api/Businesses/${id}`);
+  },
+};

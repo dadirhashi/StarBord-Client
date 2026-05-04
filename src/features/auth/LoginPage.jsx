@@ -23,7 +23,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      const { token, user } = await authApi.login(email, password);
+      const { token, ...user } = await authApi.login(email, password);
       login(token, user);
       navigate(from, { replace: true });
     } catch (err) {

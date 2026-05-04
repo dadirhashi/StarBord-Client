@@ -1,13 +1,18 @@
-import api from "../../shared/api/axiosInstance";
+import axiosInstance from '../../shared/api/axiosInstance';
 
-export const getReviews = (businessId) =>
-  api.get("/Reviews", { params: { businessId } }).then((r) => r.data);
+export const reviewsApi = {
+  getAll: async () => {
+    const { data } = await axiosInstance.get('/api/Reviews');
+    return data;
+  },
 
-export const fetchGoogleReviews = (businessId) =>
-  api.post(`/GoogleReviews/fetch/${businessId}`).then((r) => r.data);
+  getByBusiness: async (businessId) => {
+    const { data } = await axiosInstance.get(`/api/Reviews/business/${businessId}`);
+    return data;
+  },
 
-export const respondToReview = (reviewId, content) =>
-  api.post("/Responses", { reviewId, content }).then((r) => r.data);
-
-export const getResponses = (reviewId) =>
-  api.get("/Responses", { params: { reviewId } }).then((r) => r.data);
+  getById: async (id) => {
+    const { data } = await axiosInstance.get(`/api/Reviews/${id}`);
+    return data;
+  },
+};
