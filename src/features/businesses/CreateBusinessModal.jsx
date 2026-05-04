@@ -9,19 +9,7 @@ export default function CreateBusinessModal({ isOpen, onClose, onCreated }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const firstFieldRef = useRef(null);
 
-  // Reset form whenever modal opens
-  useEffect(() => {
-    if (isOpen) {
-      setName('');
-      setAddress('');
-      setError('');
-      setIsSubmitting(false);
-      // Focus the first field on open
-      setTimeout(() => firstFieldRef.current?.focus(), 0);
-    }
-  }, [isOpen]);
-
-  // Close on Escape
+  // Close on Escape — genuine sync with an external system (document)
   useEffect(() => {
     if (!isOpen) return;
     function handleEscape(e) {
@@ -30,6 +18,11 @@ export default function CreateBusinessModal({ isOpen, onClose, onCreated }) {
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
+
+  // Focus first field on mount
+  useEffect(() => {
+    firstFieldRef.current?.focus();
+  }, []);
 
   if (!isOpen) return null;
 

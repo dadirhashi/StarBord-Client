@@ -21,6 +21,7 @@ export default function BusinessesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalKey, setModalKey] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -85,7 +86,9 @@ export default function BusinessesPage() {
           <button
             type="button"
             className={styles.emptyButton}
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => { setModalKey((k) => k + 1);
+             setIsModalOpen(true);
+             }}
           >
             + Add a business
           </button>
@@ -112,6 +115,7 @@ export default function BusinessesPage() {
       )}
 
       <CreateBusinessModal
+        key={modalKey}  
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onCreated={handleCreated}
