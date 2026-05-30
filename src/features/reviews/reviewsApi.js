@@ -15,4 +15,14 @@ export const reviewsApi = {
     const { data } = await axiosInstance.get(`/api/Reviews/${id}`);
     return data;
   },
+
+  syncFromTrustpilot: async (businessId) => {
+    const { data } = await axiosInstance.post(`/api/trustpilot/sync/${businessId}`);
+    return data;
+  },
+
+  connectTrustpilot: async (businessId) => {
+    const { data } = await axiosInstance.get(`/api/trustpilot/connect/${businessId}`);
+    return data.authorizationUrl;
+  },
 };

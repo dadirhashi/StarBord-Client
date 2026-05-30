@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { reviewsApi } from './reviewsApi';
 import styles from './ReviewsPage.module.css';
@@ -8,9 +8,7 @@ const renderStars = (rating) => '★'.repeat(rating) + '☆'.repeat(5 - rating);
 const formatDate = (iso) => {
   try {
     return new Date(iso).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+      year: 'numeric', month: 'short', day: 'numeric',
     });
   } catch {
     return '';
@@ -23,47 +21,84 @@ export default function ReviewsPage() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncMessage, setSyncMessage] = useState(null);
+
+  const loadReviews = useCallback(async () => {
+    if (!businessId) return;
+    try {
+      setError(null);
+      const data = await reviewsApi.getByBusiness(businessId);
+      setReviews(data);
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Failed to load reviews');
+    }
+  }, [businessId]);
 
   useEffect(() => {
-    if (!businessId) return;
-
     let cancelled = false;
-
-    const load = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await reviewsApi.getByBusiness(businessId);
-        if (!cancelled) setReviews(data);
-      } catch (err) {
-        if (!cancelled) {
-          setError(
-            err.response?.data?.message ||
-            err.message ||
-            'Failed to load reviews'
-          );
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    load();
+    (async () => {
+      setLoading(true);
+      await loadReviews();
+      if (!cancelled) setLoading(false);
+    })();
     return () => { cancelled = true; };
-  }, [businessId]);
+  }, [loadReviews]);
+
+  const handleSync = async () => {
+    setSyncing(true);
+    setSyncMessage(null);
+    try {
+      await reviewsApi.syncFromTrustpilot(businessId);
+      setSyncMessage('Sync complete');
+      await loadReviews();
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Failed to sync from Trustpilot');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const handleConnect = async () => {
+    try {
+      const url = await reviewsApi.connectTrustpilot(businessId);
+      window.location.href = url;
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Failed to start Trustpilot connect');
+    }
+  };
 
   if (!businessId) return <Navigate to="/businesses" replace />;
   if (loading) return <div className={styles.loading}>Loading reviews…</div>;
-  if (error) return <div className={styles.error}>Error: {error}</div>;
 
   return (
     <div className={styles.page}>
       <div className={styles.header}>
         <h1 className={styles.title}>Reviews</h1>
-        <span className={styles.count}>
-          {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}
-        </span>
+        <div className={styles.headerActions}>
+          <span className={styles.count}>
+            {reviews.length} {reviews.length === 1 ? 'review' : 'reviews'}
+          </span>
+          <button
+            type="button"
+            onClick={handleConnect}
+            className={styles.connectButton}
+          >
+            Connect Trustpilot
+          </button>
+          <button
+            type="button"
+            onClick={handleSync}
+            disabled={syncing}
+            className={styles.syncButton}
+          >
+            {syncing ? 'Syncing…' : 'Sync from Trustpilot'}
+          </button>
+        </div>
       </div>
+
+      {syncMessage && <div className={styles.success}>{syncMessage}</div>}
+      {error && <div className={styles.error}>Error: {error}</div>}
 
       {reviews.length === 0 ? (
         <div className={styles.empty}>No reviews yet for this business.</div>

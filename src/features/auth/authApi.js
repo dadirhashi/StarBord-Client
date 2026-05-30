@@ -6,6 +6,6 @@ export const authApi = {
       email,
       password,
     });
-    return response.data; // { token, user }
+    return response.data; // { token,email, username }
   },
 };
