@@ -1,18 +1,15 @@
 import axiosInstance from '../../shared/api/axiosInstance';
 
 export const reviewsApi = {
-  getAll: async () => {
-    const { data } = await axiosInstance.get('/api/Reviews');
-    return data;
-  },
-
+  // Backend: GET /api/reviews/business/{businessId}
   getByBusiness: async (businessId) => {
-    const { data } = await axiosInstance.get(`/api/Reviews/business/${businessId}`);
+    const { data } = await axiosInstance.get(`/api/reviews/business/${businessId}`);
     return data;
   },
 
+  // Backend: GET /api/reviews/{reviewId}
   getById: async (id) => {
-    const { data } = await axiosInstance.get(`/api/Reviews/${id}`);
+    const { data } = await axiosInstance.get(`/api/reviews/${id}`);
     return data;
   },
 };

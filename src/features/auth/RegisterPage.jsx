@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import { authApi } from './authApi';
-import styles from './LoginPage.module.css';
+import styles from './LoginPage.module.css'; // samma utseende som inloggningen
 
-export default function LoginPage() {
+export default function RegisterPage() {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -12,25 +13,36 @@ export default function LoginPage() {
 
   const { login } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // If ProtectedRoute bounced the user here, send them back where they came from.
-  const from = location.state?.from?.pathname || '/dashboard';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setIsSubmitting(true);
 
+    // Samma regler som backend ([MinLength] i CreateUserDto) => snabbare feedback.
+    // Backend kontrollerar ändå igen: lita aldrig bara på klienten.
+    if (username.trim().length < 3) {
+      setError('Username must be at least 3 characters.');
+      return;
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
-      const { token, ...user } = await authApi.login(email, password);
+      // 1. Skapa kontot
+      await authApi.register(username.trim(), email.trim(), password);
+
+      // 2. Logga in direkt så användaren slipper skriva allt igen
+      const { token, ...user } = await authApi.login(email.trim(), password);
       login(token, user);
-      navigate(from, { replace: true });
+      navigate('/dashboard', { replace: true });
     } catch (err) {
-      if (err.response?.status === 401) {
-        setError('Invalid email or password.');
-      } else if (err.response?.data?.message) {
-        setError(err.response.data.message);
+      if (err.response?.status === 409) {
+        setError('An account with this email already exists.');
+      } else if (err.response?.status === 400) {
+        setError('Please check your details and try again.');
       } else {
         setError('Something went wrong. Please try again.');
       }
@@ -43,9 +55,24 @@ export default function LoginPage() {
     <div className={styles.container}>
       <div className={styles.card}>
         <h1 className={styles.title}>StarBoard</h1>
-        <p className={styles.subtitle}>Sign in to your account</p>
+        <p className={styles.subtitle}>Create your account</p>
 
         <form onSubmit={handleSubmit} className={styles.form} noValidate>
+          <div className={styles.field}>
+            <label htmlFor="username" className={styles.label}>Username</label>
+            <input
+              id="username"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              autoComplete="username"
+              autoFocus
+              disabled={isSubmitting}
+              className={styles.input}
+            />
+          </div>
+
           <div className={styles.field}>
             <label htmlFor="email" className={styles.label}>Email</label>
             <input
@@ -55,7 +82,6 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              autoFocus
               disabled={isSubmitting}
               className={styles.input}
             />
@@ -69,7 +95,7 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              autoComplete="current-password"
+              autoComplete="new-password"
               disabled={isSubmitting}
               className={styles.input}
             />
@@ -79,17 +105,13 @@ export default function LoginPage() {
             <div className={styles.error} role="alert">{error}</div>
           )}
 
-          <button
-            type="submit"
-            className={styles.button}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Signing in…' : 'Sign in'}
+          <button type="submit" className={styles.button} disabled={isSubmitting}>
+            {isSubmitting ? 'Creating account…' : 'Create account'}
           </button>
         </form>
 
         <p className={styles.subtitle} style={{ marginTop: '1.5rem', marginBottom: 0 }}>
-          No account yet? <Link to="/register">Create one</Link>
+          Already have an account? <Link to="/login">Sign in</Link>
         </p>
       </div>
     </div>

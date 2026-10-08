@@ -1,10 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
 import MainLayout from "../shared/layouts/MainLayout";
 import AuthLayout from "../shared/layouts/AuthLayout";
 import ProtectedRoute from "../shared/components/ProtectedRoute";
-
 import LoginPage from "../features/auth/LoginPage";
+import RegisterPage from "../features/auth/RegisterPage";
 import DashboardPage from "../features/dashboard/DashboardPage";
 import ReviewsPage from "../features/reviews/ReviewsPage";
 import BusinessesPage from "../features/businesses/BusinessesPage";
@@ -17,6 +16,7 @@ export default function App() {
         {/* Public routes */}
         <Route element={<AuthLayout />}>
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
         </Route>
 
         {/* Protected routes */}
